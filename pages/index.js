@@ -1,22 +1,24 @@
 import Head from "next/head";
-import KamarNotices from "kamar-notices";
 import styles from "../styles/notices.module.css";
-import { useEffect } from "react";
-
-export async function getStaticProps() {
-  const notices = new KamarNotices("https://kamar.camhigh.school.nz");
-  return {
-    props: {
-      notices: await notices.getNotices(),
-    },
-    revalidate: 1,
-  };
-}
+import { useState, useEffect } from "react";
 
 export default function NoticeScreen({ notices }) {
+  //data
+  const [data, setData] = useState([]);
+
+  async function getNotices() {
+    notices = await fetch("/api/notices");
+    setData(await notices.json());
+  }
+
+  useEffect(() => {
+    getNotices();
+  }, [false]);
+
+  //slider
   useEffect(() => {
     let slide = 0;
-    setInterval(() => {
+    const id = setInterval(() => {
       let notice = document.querySelectorAll("." + styles.notice);
       notice.forEach((e) => {
         e.classList.remove(styles.active);
@@ -24,25 +26,41 @@ export default function NoticeScreen({ notices }) {
       if (notice[slide + 1]) {
         slide += 1;
       } else {
+        getNotices();
         slide = 0;
       }
       notice[slide].classList.add(styles.active);
+
       let contentElement = notice[slide].querySelectorAll(
         "." + styles.noticeContent
+      )[0];
+      let titleElement = notice[slide].querySelectorAll(
+        "." + styles.noticeTitle
       )[0];
       setTimeout(() => {
         contentElement.scrollTo({
           top: contentElement.scrollHeight,
           behavior: "smooth",
         });
+        titleElement.scrollTo({
+          left: 0,
+          behavior: "smooth",
+        });
       }, 7.5 * 1000);
+      setTimeout(() => {
+        titleElement.scrollTo({
+          left: contentElement.scrollWidth,
+          behavior: "smooth",
+        });
+      }, 2.5 * 1000);
       setTimeout(() => {
         contentElement.scrollTo({
           top: 0,
         });
       }, 16 * 1000);
     }, 15 * 1000);
-  });
+    return () => clearInterval(id);
+  }, [data]);
 
   return (
     <div className="container">
@@ -51,7 +69,7 @@ export default function NoticeScreen({ notices }) {
         <meta name="description" content="Displays notices on a TV." />
       </Head>
       <div className={styles.notices}>
-        {notices.map((notice, i) => {
+        {data.map((notice, i) => {
           return (
             <div
               key={i}

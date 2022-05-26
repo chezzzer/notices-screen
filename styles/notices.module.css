@@ -10,15 +10,19 @@
 }
 
 .notices .noticeTitle {
+    overflow-x: visible;
+    white-space: nowrap;
     margin: 0;
     font-size: 60px;
+    overflow-x: hidden;
 }
 
 .notices .noticeContent {
-    height:55vh;
+    height: 80%;
     overflow-y: auto;
     font-size: 40px;
     margin-top:20px;
+    margin-bottom: 0;
 }
 
 .notices .noticeData {
